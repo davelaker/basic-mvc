@@ -1,0 +1,28 @@
+Options +FollowSymLinks
+Options -Indexes
+
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    RewriteCond %{REQUEST_FILENAME} !-d
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteRule ^(.*)$ index.php?url=$1 [QSA,L]
+</IfModule>
+
+<IfModule mod_deflate.c>
+    # Insert filter
+    SetOutputFilter DEFLATE
+    
+    # Don't compress images
+    SetEnvIfNoCase Request_URI \
+    \.(?:gif|jpe?g|png)$ no-gzip dont-vary
+    
+    # Make sure proxies don't deliver the wrong content
+    Header append Vary User-Agent env=!dont-vary
+</IfModule>
+
+# Cache images, JavaScript and CSS for a week.
+# PageSpeed can then improve caching from here on.
+<FilesMatch "\.(jpg|jpeg|gif|png|js|css)$">
+    Header unset Etag
+    Header set Cache-control "public, max-age=604800"
+</FilesMatch>
