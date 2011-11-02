@@ -15,4 +15,5 @@ require CORE_PATH . 'lib' . DS . 'classes' . DS . 'controller.class.php';
 require CORE_PATH . 'lib' . DS . 'classes' . DS . 'model.class.php';
 require CORE_PATH . 'lib' . DS . 'classes' . DS . 'view.class.php';
 require CORE_PATH . 'lib' . DS . 'classes' . DS . 'config.class.php';
+Config::addSessionConfigs();
 require CORE_PATH . 'lib' . DS . 'classes' . DS . 'database.class.php';
