@@ -1,0 +1,364 @@
+<?php
+/**
+ * Database connection and queries
+ *
+ * @author DaveLaker
+ */
+class Database {
+
+    private $connection;
+    private $database;
+    private $numQueries;
+    private $lastResult;
+    private $lastQueryExecution;
+    private $objStart;
+    private $defaultDebug = true;
+
+    /**
+     * constructor for db class
+     *
+     * @author DaveLaker
+     */
+    public function __construct()
+    {
+        $this->objStart = $this->getMicroTime();
+        $this->dbConnect();
+    }
+
+    /**
+     * processes query and debugs if required
+     *
+     * @author DaveLaker
+     *
+     * @param $sql string the query to execute
+     * @param $bebug bool whether or not to debug
+     * @return db resource
+     */
+    public function doQuery($sql, $debug=false)
+    {
+        $this->numQueries++;
+        $sqlStart = $this->getMicroTime();
+        $this->lastResult = mysql_query($sql) or $this->debugAndDie($sql);
+        $sqlEnd = $this->getMicroTime();
+        $this->lastQueryExecution = $sqlStart - $sqlEnd;
+
+        $this->debug($debug, $sql, $this->lastResult);
+
+        return $this->lastResult;
+    }
+
+    /**
+     * Do the same as doQuery() but do not return result.
+     * Should be used for INSERT, UPDATE, DELETE...
+     * NOTE: doesn't store result in $this->lastResult;
+     *
+     * @author DaveLaker
+     *
+     * @param $query The query.
+     * @param $debug If true, it output the query and the resulting table.
+     */
+    function doExecute($sql, $debug=false)
+    {
+      $this->numQueries++;
+      mysql_query($sql) or $this->debugAndDie($sql);
+
+      $this->debug($debug, $sql);
+    }
+
+    /**
+     * Get the result of the query as value
+     * NOTE: doesn't store result in $this->lastResult;
+     *
+     * @author DaveLaker
+     *
+     * @param $sql The query.
+     * @param $debug If true, it output the query and the resulting value.
+     * @return string The required value.
+     */
+    function doQuerySingle($sql, $debug = false)
+    {
+      $sql = $sql." LIMIT 1";
+
+      $this->numQueries++;
+      $result = mysql_query($sql) or $this->debugAndDie($sql);
+      $count = $this->numRows($result);
+      if($count == 0) return false;
+      $row = mysql_fetch_row($result);
+
+      $this->debug($debug, $sql, $result);
+
+      return $row[0];
+    }
+
+     /**
+     * Get the result of the query as entire row
+     * NOTE: doesn't store result in $this->lastResult;
+     *
+     * @author DaveLaker
+     *
+     * @param $sql The query.
+     * @param $debug If true, it output the query and the resulting value.
+     * @return string The required value.
+     */
+    function doQuerySingleRow($sql, $debug = false)
+    {
+      $sql = $sql." LIMIT 1";
+
+      $this->numQueries++;
+      $result = mysql_query($sql) or $this->debugAndDie($sql);
+      if(!$this->numRows($result)) return false;
+      $row = mysql_fetch_object($result);
+
+      $this->debug($debug, $sql, $result);
+
+      return $row;
+    }
+
+    /**
+     * Convenient method for mysql_fetch_object().
+     *
+     * @author DaveLaker
+     *
+     * @param $result The ressource returned by query(). If NULL, the last result returned by query() will be used.
+     * @return An object representing a data row.
+     */
+    function fetchNextRow($result = NULL)
+    {
+      if ($result == NULL) $result = $this->lastResult;
+
+      if ($result == NULL || mysql_num_rows($result) < 1) return false;
+      else return mysql_fetch_object($result);
+    }
+
+    /**
+     * Get the number of rows of a query.
+     *
+     * @author DaveLaker
+     *
+     * @param $result The ressource returned by doQuery(). If NULL, the last result returned by doQuery() will be used.
+     * @return The number of rows of the query (0 or more).
+     */
+    public function numRows($result = NULL)
+    {
+      if ($result == NULL) return mysql_num_rows($this->lastResult);
+      else return mysql_num_rows($result);
+    }
+
+    /**
+     * database connection
+     *
+     * @author DaveLaker
+     */
+    public function dbConnect()
+    {
+        $this->connection = mysql_connect(Config::read('db_host'), Config::read('db_user'), Config::read('db_pass'));
+        if(!$this->connection)
+        {
+            echo $err = mysql_errno(). " : " . mysql_error();
+            die("We are currently experiencing very heavy traffic to our site, please be patient and try again shortly.");
+        }
+        $this->database = mysql_select_db(Config::read('db_name'));
+        if(!$this->database)
+        {
+            echo $err = mysql_errno(). " : " . mysql_error();
+            die("Failed to connect to database - check your database name..");
+        }
+        return true;
+    }
+
+    /**
+     * Internal function to debug when MySQL encountered an error, even if debug is set to Off.
+     *
+     * @author DaveLaker
+     *
+     * @param $sql string The SQL query to echo before diying.
+     */
+    function debugAndDie($sql)
+    {
+        $this->debugQuery($sql, "Error");
+        die("<p style=\"margin: 2px;\">".mysql_error()."</p></div>");
+    }
+
+    /**
+     * Internal function to debug a MySQL query.
+     * Show the query and output the resulting table if not NULL.
+     *
+     * @author DaveLaker
+     *
+     * @param $debug bool The parameter passed to query() functions. Can be boolean or -1 (default).
+     * @param $sql string The SQL query to debug.
+     * @param $result resource The resulting table of the query, if available.
+     */
+
+    private function debug($debug, $sql, $result = NULL)
+    {
+        if ((!$debug) && (!$this->defaultDebug)) return;
+        if (!$debug) return;
+
+        $reason = (!$debug) ? "Default Debug" : "Debug";
+        $this->debugQuery($sql, $reason);
+        if ($result == NULL) echo "<p style=\"margin: 2px;\">Number of affected rows: ".mysql_affected_rows()."</p></div>";
+        else $this->debugResult($result);
+    }
+
+    /**
+     * Internal function to output a query for debug purpose.
+     * Should be followed by a call to debugResult() or an echo of "</div>".
+     *
+     * @author DaveLaker
+     *
+     * @param $sql string The SQL query to debug.
+     * @param $reason string The reason why this function is called: "Default Debug", "Debug" or "Error".
+     */
+    private function debugQuery($sql, $reason = "Debug")
+    {
+        $color = ($reason == "Error" ? "red" : "orange");
+        echo "<div style=\"border: solid $color 1px; margin: 2px;\">".
+           "<p style=\"margin: 0 0 2px 0; padding: 0; background-color: #DDF;\">".
+           "<strong style=\"padding: 0 3px; background-color: $color; color: white;\">$reason:</strong> ".
+           "<span style=\"font-family: monospace;\">".htmlentities($sql)."</span></p>";
+    }
+
+    /**
+     * Internal function to output a table representing the result of a query, for debug purpose.
+     * Should be preceded by a call to debugQuery().
+     *
+     * @author DaveLaker
+     *
+     * @param $result The resulting table of the query.
+     */
+    private function debugResult($result)
+    {
+        echo "
+        <table border=\"1\" style=\"margin: 2px;\">
+            <thead style=\"font-size: 80%\">";
+        $numFields = mysql_num_fields($result);
+        // BEGIN HEADER
+        $tables    = array();
+        $nbTables  = -1;
+        $lastTable = "";
+        $fields    = array();
+        $nbFields  = -1;
+        while ($column = mysql_fetch_field($result)) {
+            if ($column->table != $lastTable)
+            {
+                $nbTables++;
+                $tables[$nbTables] = array("name" => $column->table, "count" => 1);
+            } else {
+                $tables[$nbTables]["count"]++;
+                $lastTable = $column->table;
+                $nbFields++;
+                $fields[$nbFields] = $column->name;
+            }
+        }
+        for ($i = 0; $i <= $nbTables; $i++)
+        {
+            echo "<th colspan=".$tables[$i]["count"].">".$tables[$i]["name"]."</th>";
+        }
+        echo "</thead>";
+        echo "<thead style=\"font-size: 80%\">";
+        for ($i = 0; $i <= $nbFields; $i++)
+        {
+            echo "<th>".$fields[$i]."</th>";
+        }
+        echo "</thead>";
+        // END HEADER
+        while ($row = mysql_fetch_array($result))
+        {
+            echo "<tr>";
+            for ($i = 0; $i < $numFields; $i++)
+            {
+                echo "<td>".htmlentities($row[$i])."</td>";
+            }
+            echo "</tr>";
+        }
+        echo "</table></div>";
+        $this->resetFetch($result);
+    }
+
+    /**
+     * Get how many time the script took from the begin of this object.
+     *
+     * @author DaveLaker
+     *
+     * @return The script execution time in seconds since the creation of this object.
+     */
+    function getExecTime()
+    {
+        return round(($this->getMicroTime() - $this->mtStart) * 1000) / 1000;
+    }
+
+    /**
+     * Get the number of queries executed from the begin of this object.
+     *
+     * @author DaveLaker
+     *
+     * @return The number of queries executed on the database server since the creation of this object.
+     */
+    function getQueriesCount()
+    {
+        return $this->numQueries;
+    }
+
+    /**
+     * Go back to the first element of the result line.
+     *
+     * @author DaveLaker
+     * 
+     * @param $result The resssource returned by the doQuery() function.
+     */
+    function resetFetch($result)
+    {
+        if (mysql_num_rows($result) > 0) mysql_data_seek($result, 0);
+    }
+
+    /**
+     * Get the id of the very last inserted row.
+     *
+     * @author DaveLaker
+     * 
+     * @return The id of the very last inserted row (in any table).
+     */
+    function lastInsertedId()
+    {
+        return mysql_insert_id();
+    }
+    
+    /**
+     * Close the connexion with the database server.
+     *
+     * @author DaveLaker
+     *
+     * It's usually unneeded since PHP do it automatically at script end.
+     */
+    function close()
+    {
+        mysql_close();
+    }
+
+    /**
+     * Internal method to get the current time.
+     *
+     * @author DaveLaker
+     * 
+     * @return The current time in seconds with microseconds (in float format).
+     */
+    function getMicroTime()
+    {
+        list($msec, $sec) = explode(' ', microtime());
+        return floor($sec / 1000) + $msec;
+    }
+
+    /**
+     * Internal method to add mysql_real_escape_string to vars in query.
+     *
+     * @author DaveLaker
+     *
+     * @return var that has been cleaned by mysql_real_escape_string
+     */
+    function mres($val)
+    {
+        return mysql_real_escape_string($val);
+    }
+}
+?>

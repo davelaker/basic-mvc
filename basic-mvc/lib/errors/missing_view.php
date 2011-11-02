@@ -1,0 +1,1 @@
+You need to create a view for this method! (views/<?php echo cleanForOutput($controller); ?>/<?php echo cleanForOutput($method); ?>.php)

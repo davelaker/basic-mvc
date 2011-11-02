@@ -1,0 +1,1 @@
+Ensure your controller class is called '<?php echo cleanForOutput($controller); ?>Controller'! e.g. &lt;?php class <?php echo cleanForOutput($controller); ?>Controller extends DefaultController { ... }

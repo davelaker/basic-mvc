@@ -1,0 +1,1 @@
+You need to create the controller '<?php echo cleanForOutput($controller); ?>'!
