@@ -1,5 +1,4 @@
 <?php
-
 /**
  * App ENV can be set in a htacces file or in http setup (httpd.conf or individual vhost)
  * If none set then production is assumed
