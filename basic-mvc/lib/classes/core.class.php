@@ -1,7 +1,7 @@
 <?php
 class Core {
     
-    public function newInstance($type, $class, $instantiate = true) {
+    public static function newInstance($type, $class, $instantiate = true) {
         switch($type) {
             case 'Model' :
                 require_once('models'.DS.$class.'.php');
