@@ -22,7 +22,7 @@ class Config {
 		}
     }
     
-    public static function write($config, $value = null) {
+    public static function write($config, $value = null, $addToSession = false) {
         
 		if (!is_array($config)) {
 			$config = array($config => $value);
@@ -30,9 +30,20 @@ class Config {
 
 		foreach ($config as $name => $value) {
 			self::$_configs[$name] = $value;
+            if($addToSession == true) {
+                $_SESSION['_configs'][$name] = $value;
+            }
 		}
 
 		return true;
 	}
+    
+    public static function addSessionConfigs() {
+        if(!empty($_SESSION['_configs'])) {
+            foreach ($_SESSION['_configs'] as $name => $value) {
+                self::$_configs[$name] = $value;
+            }
+        }
+    }
     
 }
