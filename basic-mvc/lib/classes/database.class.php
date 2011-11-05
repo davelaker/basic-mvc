@@ -9,26 +9,41 @@ class Database {
     private $connection;
     private $database;
     private $numQueries;
+    private $queries = array();
     private $lastResult;
     private $lastQueryExecution;
     private $objStart;
     private $defaultDebug = true;
+    
+    private static $instance;
 
     /**
      * constructor for db class
      *
-     * @author DaveLaker
      */
-    public function __construct()
+    private function __construct()
     {
         $this->objStart = $this->getMicroTime();
         $this->dbConnect();
     }
+    
+    
+    /**
+     * Used for Singleton Design pattern so we don't have institate for every model
+     * 
+     * @return object
+     */
+    public function getInstance() {
+        
+        if ( is_null( self::$instance ) ) {
+          self::$instance = new self();
+        }
+        return self::$instance;
+        
+    }
 
     /**
      * processes query and debugs if required
-     *
-     * @author DaveLaker
      *
      * @param $sql string the query to execute
      * @param $bebug bool whether or not to debug
@@ -37,6 +52,7 @@ class Database {
     public function doQuery($sql, $debug=false)
     {
         $this->numQueries++;
+        $this->queries[] = $sql;
         $sqlStart = $this->getMicroTime();
         $this->lastResult = mysql_query($sql) or $this->debugAndDie($sql);
         $sqlEnd = $this->getMicroTime();
@@ -52,8 +68,6 @@ class Database {
      * Should be used for INSERT, UPDATE, DELETE...
      * NOTE: doesn't store result in $this->lastResult;
      *
-     * @author DaveLaker
-     *
      * @param $query The query.
      * @param $debug If true, it output the query and the resulting table.
      */
@@ -68,8 +82,6 @@ class Database {
     /**
      * Get the result of the query as value
      * NOTE: doesn't store result in $this->lastResult;
-     *
-     * @author DaveLaker
      *
      * @param $sql The query.
      * @param $debug If true, it output the query and the resulting value.
@@ -94,8 +106,6 @@ class Database {
      * Get the result of the query as entire row
      * NOTE: doesn't store result in $this->lastResult;
      *
-     * @author DaveLaker
-     *
      * @param $sql The query.
      * @param $debug If true, it output the query and the resulting value.
      * @return string The required value.
@@ -116,9 +126,7 @@ class Database {
 
     /**
      * Convenient method for mysql_fetch_object().
-     *
-     * @author DaveLaker
-     *
+     *     *
      * @param $result The ressource returned by query(). If NULL, the last result returned by query() will be used.
      * @return An object representing a data row.
      */
@@ -133,8 +141,6 @@ class Database {
     /**
      * Get the number of rows of a query.
      *
-     * @author DaveLaker
-     *
      * @param $result The ressource returned by doQuery(). If NULL, the last result returned by doQuery() will be used.
      * @return The number of rows of the query (0 or more).
      */
@@ -147,7 +153,6 @@ class Database {
     /**
      * database connection
      *
-     * @author DaveLaker
      */
     public function dbConnect()
     {
@@ -161,15 +166,13 @@ class Database {
         if(!$this->database)
         {
             echo $err = mysql_errno(). " : " . mysql_error();
-            die("Failed to connect to database - check your database name..");
+            die("Failed to connect to database - check your database name.");
         }
         return true;
     }
 
     /**
      * Internal function to debug when MySQL encountered an error, even if debug is set to Off.
-     *
-     * @author DaveLaker
      *
      * @param $sql string The SQL query to echo before diying.
      */
@@ -182,8 +185,6 @@ class Database {
     /**
      * Internal function to debug a MySQL query.
      * Show the query and output the resulting table if not NULL.
-     *
-     * @author DaveLaker
      *
      * @param $debug bool The parameter passed to query() functions. Can be boolean or -1 (default).
      * @param $sql string The SQL query to debug.
@@ -205,8 +206,6 @@ class Database {
      * Internal function to output a query for debug purpose.
      * Should be followed by a call to debugResult() or an echo of "</div>".
      *
-     * @author DaveLaker
-     *
      * @param $sql string The SQL query to debug.
      * @param $reason string The reason why this function is called: "Default Debug", "Debug" or "Error".
      */
@@ -222,8 +221,6 @@ class Database {
     /**
      * Internal function to output a table representing the result of a query, for debug purpose.
      * Should be preceded by a call to debugQuery().
-     *
-     * @author DaveLaker
      *
      * @param $result The resulting table of the query.
      */
@@ -279,8 +276,6 @@ class Database {
     /**
      * Get how many time the script took from the begin of this object.
      *
-     * @author DaveLaker
-     *
      * @return The script execution time in seconds since the creation of this object.
      */
     function getExecTime()
@@ -291,8 +286,6 @@ class Database {
     /**
      * Get the number of queries executed from the begin of this object.
      *
-     * @author DaveLaker
-     *
      * @return The number of queries executed on the database server since the creation of this object.
      */
     function getQueriesCount()
@@ -302,8 +295,6 @@ class Database {
 
     /**
      * Go back to the first element of the result line.
-     *
-     * @author DaveLaker
      * 
      * @param $result The resssource returned by the doQuery() function.
      */
@@ -315,8 +306,6 @@ class Database {
     /**
      * Get the id of the very last inserted row.
      *
-     * @author DaveLaker
-     * 
      * @return The id of the very last inserted row (in any table).
      */
     function lastInsertedId()
@@ -327,9 +316,8 @@ class Database {
     /**
      * Close the connexion with the database server.
      *
-     * @author DaveLaker
-     *
      * It's usually unneeded since PHP do it automatically at script end.
+     * 
      */
     function close()
     {
@@ -338,8 +326,6 @@ class Database {
 
     /**
      * Internal method to get the current time.
-     *
-     * @author DaveLaker
      * 
      * @return The current time in seconds with microseconds (in float format).
      */
@@ -351,8 +337,6 @@ class Database {
 
     /**
      * Internal method to add mysql_real_escape_string to vars in query.
-     *
-     * @author DaveLaker
      *
      * @return var that has been cleaned by mysql_real_escape_string
      */
