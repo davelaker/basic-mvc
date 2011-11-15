@@ -28,8 +28,6 @@ if (!defined('APP_DIR')) {
  * Add user defined constants and variables below
  *  
  */
-$debug = true;
-
 switch (APP_ENV) {
     case 'dev_dave':
         define('CORE_INCLUDES_PATH', ROOT . DS . 'basic-mvc');
@@ -66,7 +64,7 @@ if (!include(CORE_PATH . 'lib' . DS . 'bootstrap.php')) {
     trigger_error("Could not locate required setup files", E_USER_ERROR);
 }
 
-$pageStartTime = getMicrotime();
+Config::write('_mvc_page_start_time', getMicrotime());
 
 if (isset($_GET['url']) && $_GET['url'] === 'favicon.ico') {
     return;
@@ -77,7 +75,54 @@ if (isset($_GET['url']) && $_GET['url'] === 'favicon.ico') {
     $Dispatcher->generatePage($url);
 }
 
-if($debug === true) {
-    $pageEndTime = getMicrotime();
-    # do something
+if(Config::read('debug') == true) {
+    Config::write('_mvc_page_end_time', getMicrotime());
+    ?>
+    <style type="text/css">
+        #_mvc_errorBox {
+            position:absolute; 
+            top: 5px; 
+            left: 5px; 
+            border: 1px solid #000; 
+            border-radius: 6px; 
+            box-shadow: 3px 3px 15px #888;
+            background: #eee;
+            padding: 10px;
+            font-size: 12px;
+            font-family: helvetica, arial, sans-serif;
+            width:auto;
+        }
+        h1 {
+            font-size: 16px;
+            text-shadow: 2px 2px 6px #000;
+        }
+    </style>
+    <div id="_mvc_errorBox">
+        <p>
+            Page Load Time: <?php echo round(Config::read('_mvc_page_end_time') - Config::read('_mvc_page_start_time'), 2); ?>
+            <?php $errors = Config::read('_mvc_errors'); 
+            if(!empty($errors)) : ?>
+            <h1>Errors: </h1>
+            <ul>
+                <?php foreach($errors as $error) : ?>
+                    <li><?php echo $error; ?></li>
+                <?php endforeach; ?>
+            </ul>
+            <?php endif; 
+            if(Config::read('db_name') != '') :
+                $db = Database::getInstance();
+                ?>
+                <h1>Queries: </h1>
+                <p>There were a total of <?php echo $db->getQueriesCount(); ?> queries</p>
+                <ul>
+                    <?php 
+                    $queries = $db->getQueries();
+                    foreach($queries as $query) : ?>
+                        <li><?php echo $query; ?></li>
+                    <?php endforeach; ?>
+                </ul>
+            <?php endif; ?>
+        </p>
+    </div>
+    <?php
 }

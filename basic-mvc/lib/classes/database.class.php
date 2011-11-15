@@ -8,7 +8,7 @@ class Database {
 
     private $connection;
     private $database;
-    private $numQueries;
+    private $numQueries = 0;
     private $queries = array();
     private $lastResult;
     private $lastQueryExecution;
@@ -33,7 +33,7 @@ class Database {
      * 
      * @return object
      */
-    public function getInstance() {
+    public static function getInstance() {
         
         if ( is_null( self::$instance ) ) {
           self::$instance = new self();
@@ -291,6 +291,16 @@ class Database {
     function getQueriesCount()
     {
         return $this->numQueries;
+    }
+
+    /**
+     * Get the number of queries executed from the begin of this object.
+     *
+     * @return The number of queries executed on the database server since the creation of this object.
+     */
+    function getQueries()
+    {
+        return $this->queries;
     }
 
     /**
