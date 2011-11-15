@@ -69,25 +69,30 @@ class Core {
             case 'missingController':
                 $controller = $messages['controller'];
                 $errorFile = APP_PATH.'lib'.DS.'errors'.DS.'missing_controller.php';
+                self::addError('Missing Controller \''.$controller.'\'');
                 break;
             case 'missingMethod':
                 $controller = $messages['controller'];
                 $method = $messages['method'];
                 $errorFile = APP_PATH.'lib'.DS.'errors'.DS.'missing_method.php';
+                self::addError('Missing Method \''.$method.'\' for Controller \' '.$controller.'\'');
                 break;
             case 'missingTemplate':
                 $theme = $messages['theme'];
                 $template = $messages['template'];
                 $errorFile = APP_PATH.'lib'.DS.'errors'.DS.'missing_template.php';
+                self::addError('Missing Templete \''.$theme.'\' for Theme \' '.$theme.'\'');
                 break;
             case 'missingView':
                 $controller = $messages['controller'];
                 $method = $messages['method'];
                 $errorFile = APP_PATH.'lib'.DS.'errors'.DS.'missing_view.php';
+                self::addError('Missing View \''.$method.'\' for Controller \' '.$controller.'\'');
                 break;
             case 'controllerNaming':
                 $controller = $messages['controller'];
                 $errorFile = APP_PATH.'lib'.DS.'errors'.DS.'controller_naming.php';
+                self::addError('Incorrect class naming for Controller \' '.$controller.'\'');
                 break;
         }
         require($errorFile);
@@ -102,6 +107,17 @@ class Core {
             return $out;
         }
         
+    }
+    
+    public static function addError($message) {
+        $errors = Config::read('_mvc_errors');
+        if(is_null($errors)) {
+            $errors = array($message);
+        }
+        else {
+            $errors[] = $message;
+        }
+        Config::write('_mvc_errors', $errors);
     }
         
 }

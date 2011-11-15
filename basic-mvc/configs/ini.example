@@ -1,0 +1,10 @@
+; Below is an example of what an ini config should look like
+; NOTE: currently this MVC only supports a single dimensional array (sections not included)
+
+[first_section]
+myVar1 = 'foo'
+myVar2 = 'bar'
+
+[second_section]
+myVar3 = 2
+myVar4 = 8

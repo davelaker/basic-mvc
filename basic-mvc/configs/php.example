@@ -1,0 +1,13 @@
+<?php
+
+/**
+ * Below is an example of what a php config should look like
+ *
+ * NOTE: currently this MVC only supports a single dimensional array
+ * AND the array must be called $phpConfigs;
+ */
+
+$phpConfigs = array();
+
+$phpConfigs['myVar1'] = 'foo';
+$phpConfigs['myVar2'] = 'boo';
