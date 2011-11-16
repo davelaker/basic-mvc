@@ -49,11 +49,19 @@ class Database {
      * @return db resource
      */
     private function _processQuery($sql) {
+        
         $this->numQueries++;
         $sqlStart = $this->getMicroTime();
         $result = mysql_query($sql) or $this->debugAndDie($sql);
         $sqlEnd = $this->getMicroTime();
         $this->lastQueryExecution = $sqlStart - $sqlEnd;
+        
+        $this->queries[] = array(
+            'start' => $sqlStart,
+            'end' => $sqlEnd,
+            'time' => $sqlStart - $sqlEnd,
+            'query' => $sql,
+        );
         
         return $result;
     }
