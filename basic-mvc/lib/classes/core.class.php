@@ -63,7 +63,7 @@ class Core {
      */
     public static function fatalError($error, $messages) {
         
-        $out = $this->_grabErrorFile($error, $messages);
+        $out = self::_grabErrorFile($error, $messages);
         
         die($out);
         
@@ -80,7 +80,7 @@ class Core {
      */
     public static function warningError($error, $messages) {
         
-        $out = $this->_grabErrorFile($error, $messages);
+        $out = self::_grabErrorFile($error, $messages);
                 
         return $out;
         

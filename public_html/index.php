@@ -79,10 +79,26 @@ if(Config::read('debug') == true) {
     Config::write('_mvc_page_end_time', getMicrotime());
     ?>
     <style type="text/css">
-        #_mvc_errorBox {
+        #_mvc_toggle_debug {
             position:absolute; 
             top: 5px; 
-            left: 5px; 
+            right: 5px;
+            z-index: 10000;
+            padding: 2px 5px 5px 4px;
+            cursor: pointer;
+            border: 1px solid #000; 
+            border-radius: 6px; 
+            box-shadow: 3px 3px 15px #888;
+            background: #700;
+            color: #eee;
+            
+        }
+        #_mvc_errorBox {
+            z-index: 9999;
+            position:absolute; 
+            top: 5px; 
+            left: 5px;
+            margin-right: 5px;
             border: 1px solid #000; 
             border-radius: 6px; 
             box-shadow: 3px 3px 15px #888;
@@ -100,6 +116,26 @@ if(Config::read('debug') == true) {
             border: 0px;
         }
     </style>
+    <script type="text/javascript">
+        function toggleDebug () {
+            var toggleElement = document.getElementById('_mvc_toggle_debug');
+            var debugElement = document.getElementById('_mvc_errorBox');
+            
+            if(toggleElement.className == 'open') {
+                debugElement.style.display = 'none';
+                toggleElement.className = 'closed';
+                toggleElement.innerHTML = '[ + ]';
+            }
+            else {
+                debugElement.style.display = '';
+                toggleElement.className = 'open';
+                toggleElement.innerHTML = '[ - ]';
+            }
+        }
+    </script>
+    <div id="_mvc_toggle_debug" class="open" onclick="toggleDebug();">
+        [ - ]
+    </div>
     <div id="_mvc_errorBox">
         <p>
             Page Load Time: <?php echo round(Config::read('_mvc_page_end_time') - Config::read('_mvc_page_start_time'), 2); ?>
