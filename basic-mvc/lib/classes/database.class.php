@@ -312,7 +312,7 @@ class Database {
      * @return float
      */
     function getTotalExecutionTime() {
-        return $this->totalQueryExecution;
+        return round(($this->totalQueryExecution * 1000)) / 1000;
     }
 
     /**

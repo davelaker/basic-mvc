@@ -116,7 +116,7 @@ if(Config::read('debug') == true) {
                 $db = Database::getInstance();
                 ?>
                 <h1>Queries: </h1>
-                <p>There were a total of <?php echo $db->getQueriesCount(); ?> queries</p>
+                <p>There were a total of <?php echo $db->getQueriesCount(); ?> queries (<?php echo $db->getTotalExecutionTime(); ?>s)</p>
                 <?php if($db->getQueriesCount() > 0) : ?>
                 <table>
                     <thead>
