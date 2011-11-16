@@ -96,6 +96,9 @@ if(Config::read('debug') == true) {
             font-size: 16px;
             text-shadow: 2px 2px 6px #000;
         }
+        table {
+            border: 0px;
+        }
     </style>
     <div id="_mvc_errorBox">
         <p>
@@ -114,14 +117,27 @@ if(Config::read('debug') == true) {
                 ?>
                 <h1>Queries: </h1>
                 <p>There were a total of <?php echo $db->getQueriesCount(); ?> queries</p>
-                <ul>
+                <?php if($db->getQueriesCount() > 0) : ?>
+                <table>
+                    <thead>
+                        <tr>
+                            <td>Query</td>
+                            <td>Time Taken</td>
+                        </tr>
+                    </thead>
+                    <tbody>
                     <?php 
                     $queries = $db->getQueries();
                     foreach($queries as $query) : ?>
-                        <li><?php echo $query; ?></li>
+                        <tr>
+                            <td><?php echo $query['query']; ?></td>
+                            <td><?php echo $query['time']; ?></td>
+                        </tr>
                     <?php endforeach; ?>
-                </ul>
-            <?php endif; ?>
+                    </tbody>
+                </table>
+                <?php endif;
+            endif; ?>
         </p>
     </div>
     <?php

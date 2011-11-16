@@ -21,8 +21,7 @@ class Database {
      * constructor for db class
      *
      */
-    private function __construct()
-    {
+    private function __construct() {
         $this->objStart = $this->getMicroTime();
         $this->dbConnect();
     }
@@ -35,11 +34,36 @@ class Database {
      */
     public static function getInstance() {
         
-        if ( is_null( self::$instance ) ) {
-          self::$instance = new self();
+        if(is_null(self::$instance)) {
+            self::$instance = new self();
         }
         return self::$instance;
         
+    }
+
+    /**
+     * performs actual query
+     *
+     * @param $sql string the query to execute
+     * @param $bebug bool whether or not to debug
+     * @return db resource
+     */
+    private function _processQuery($sql) {
+        
+        $this->numQueries++;
+        $sqlStart = $this->getMicroTime();
+        $result = mysql_query($sql) or $this->debugAndDie($sql);
+        $sqlEnd = $this->getMicroTime();
+        $this->lastQueryExecution = $sqlStart - $sqlEnd;
+        
+        $this->queries[] = array(
+            'start' => $sqlStart,
+            'end' => $sqlEnd,
+            'time' => $sqlStart - $sqlEnd,
+            'query' => $sql,
+        );
+        
+        return $result;
     }
 
     /**
@@ -49,15 +73,9 @@ class Database {
      * @param $bebug bool whether or not to debug
      * @return db resource
      */
-    public function doQuery($sql, $debug=false)
-    {
-        $this->numQueries++;
-        $this->queries[] = $sql;
-        $sqlStart = $this->getMicroTime();
-        $this->lastResult = mysql_query($sql) or $this->debugAndDie($sql);
-        $sqlEnd = $this->getMicroTime();
-        $this->lastQueryExecution = $sqlStart - $sqlEnd;
-
+    public function doQuery($sql, $debug=false) {
+        
+        $this->lastResult = $this->_processQuery($sql);
         $this->debug($debug, $sql, $this->lastResult);
 
         return $this->lastResult;
@@ -71,12 +89,11 @@ class Database {
      * @param $query The query.
      * @param $debug If true, it output the query and the resulting table.
      */
-    function doExecute($sql, $debug=false)
-    {
-      $this->numQueries++;
-      mysql_query($sql) or $this->debugAndDie($sql);
-
-      $this->debug($debug, $sql);
+    function doExecute($sql, $debug=false) {
+      
+        $this->_processQuery($sql);
+        $this->debug($debug, $sql);
+        
     }
 
     /**
@@ -87,19 +104,17 @@ class Database {
      * @param $debug If true, it output the query and the resulting value.
      * @return string The required value.
      */
-    function doQuerySingle($sql, $debug = false)
-    {
-      $sql = $sql." LIMIT 1";
+    function doQuerySingle($sql, $debug = false) {
 
-      $this->numQueries++;
-      $result = mysql_query($sql) or $this->debugAndDie($sql);
-      $count = $this->numRows($result);
-      if($count == 0) return false;
-      $row = mysql_fetch_row($result);
+        $sql = $sql." LIMIT 1";
+        $result = $this->_processQuery($sql);
+        $count = $this->numRows($result);
+        if($count == 0) return false;
+        $row = mysql_fetch_row($result);
 
-      $this->debug($debug, $sql, $result);
+        $this->debug($debug, $sql, $result);
 
-      return $row[0];
+        return $row[0];
     }
 
      /**
@@ -110,18 +125,16 @@ class Database {
      * @param $debug If true, it output the query and the resulting value.
      * @return string The required value.
      */
-    function doQuerySingleRow($sql, $debug = false)
-    {
-      $sql = $sql." LIMIT 1";
+    function doQuerySingleRow($sql, $debug = false) {
+        $sql = $sql." LIMIT 1";
 
-      $this->numQueries++;
-      $result = mysql_query($sql) or $this->debugAndDie($sql);
-      if(!$this->numRows($result)) return false;
-      $row = mysql_fetch_object($result);
+        $result = $this->_processQuery($sql);
+        if(!$this->numRows($result)) return false;
+        $row = mysql_fetch_object($result);
 
-      $this->debug($debug, $sql, $result);
+        $this->debug($debug, $sql, $result);
 
-      return $row;
+        return $row;
     }
 
     /**
@@ -130,12 +143,11 @@ class Database {
      * @param $result The ressource returned by query(). If NULL, the last result returned by query() will be used.
      * @return An object representing a data row.
      */
-    function fetchNextRow($result = NULL)
-    {
-      if ($result == NULL) $result = $this->lastResult;
+    function fetchNextRow($result = NULL) {
+        if ($result == NULL) $result = $this->lastResult;
 
-      if ($result == NULL || mysql_num_rows($result) < 1) return false;
-      else return mysql_fetch_object($result);
+        if ($result == NULL || mysql_num_rows($result) < 1) return false;
+        else return mysql_fetch_object($result);
     }
 
     /**
@@ -144,29 +156,30 @@ class Database {
      * @param $result The ressource returned by doQuery(). If NULL, the last result returned by doQuery() will be used.
      * @return The number of rows of the query (0 or more).
      */
-    public function numRows($result = NULL)
-    {
-      if ($result == NULL) return mysql_num_rows($this->lastResult);
-      else return mysql_num_rows($result);
+    public function numRows($result = NULL) {
+        if ($result == NULL) return mysql_num_rows($this->lastResult);
+        else return mysql_num_rows($result);
     }
 
     /**
      * database connection
      *
      */
-    public function dbConnect()
-    {
+    public function dbConnect() {
+        
         $this->connection = mysql_connect(Config::read('db_host'), Config::read('db_user'), Config::read('db_pass'));
-        if(!$this->connection)
-        {
-            echo $err = mysql_errno(). " : " . mysql_error();
-            die("We are currently experiencing very heavy traffic to our site, please be patient and try again shortly.");
+        if(!$this->connection) {
+            $messages = array();
+            $messages['errno'] = mysql_errno();
+            $messages['error'] = mysql_error();
+            Core::FatalError('dbConnectionFail', $messages);
         }
         $this->database = mysql_select_db(Config::read('db_name'));
-        if(!$this->database)
-        {
-            echo $err = mysql_errno(). " : " . mysql_error();
-            die("Failed to connect to database - check your database name.");
+        if(!$this->database) {
+            $messages = array();
+            $messages['errno'] = mysql_errno();
+            $messages['error'] = mysql_error();
+            Core::FatalError('dbDatabaseFail', $messages);
         }
         return true;
     }
@@ -176,8 +189,8 @@ class Database {
      *
      * @param $sql string The SQL query to echo before diying.
      */
-    function debugAndDie($sql)
-    {
+    function debugAndDie($sql) {
+        
         $this->debugQuery($sql, "Error");
         die("<p style=\"margin: 2px;\">".mysql_error()."</p></div>");
     }
@@ -190,9 +203,8 @@ class Database {
      * @param $sql string The SQL query to debug.
      * @param $result resource The resulting table of the query, if available.
      */
-
-    private function debug($debug, $sql, $result = NULL)
-    {
+    private function debug($debug, $sql, $result = NULL) {
+        
         if ((!$debug) && (!$this->defaultDebug)) return;
         if (!$debug) return;
 
@@ -209,8 +221,8 @@ class Database {
      * @param $sql string The SQL query to debug.
      * @param $reason string The reason why this function is called: "Default Debug", "Debug" or "Error".
      */
-    private function debugQuery($sql, $reason = "Debug")
-    {
+    private function debugQuery($sql, $reason = "Debug") {
+        
         $color = ($reason == "Error" ? "red" : "orange");
         echo "<div style=\"border: solid $color 1px; margin: 2px;\">".
            "<p style=\"margin: 0 0 2px 0; padding: 0; background-color: #DDF;\">".
@@ -224,8 +236,8 @@ class Database {
      *
      * @param $result The resulting table of the query.
      */
-    private function debugResult($result)
-    {
+    private function debugResult($result) {
+        
         echo "
         <table border=\"1\" style=\"margin: 2px;\">
             <thead style=\"font-size: 80%\">";
@@ -278,8 +290,7 @@ class Database {
      *
      * @return The script execution time in seconds since the creation of this object.
      */
-    function getExecTime()
-    {
+    function getExecTime() {
         return round(($this->getMicroTime() - $this->mtStart) * 1000) / 1000;
     }
 
@@ -288,8 +299,7 @@ class Database {
      *
      * @return The number of queries executed on the database server since the creation of this object.
      */
-    function getQueriesCount()
-    {
+    function getQueriesCount() {
         return $this->numQueries;
     }
 
@@ -298,8 +308,7 @@ class Database {
      *
      * @return The number of queries executed on the database server since the creation of this object.
      */
-    function getQueries()
-    {
+    function getQueries() {
         return $this->queries;
     }
 
@@ -308,8 +317,7 @@ class Database {
      * 
      * @param $result The resssource returned by the doQuery() function.
      */
-    function resetFetch($result)
-    {
+    function resetFetch($result) {
         if (mysql_num_rows($result) > 0) mysql_data_seek($result, 0);
     }
 
@@ -318,8 +326,7 @@ class Database {
      *
      * @return The id of the very last inserted row (in any table).
      */
-    function lastInsertedId()
-    {
+    function lastInsertedId() {
         return mysql_insert_id();
     }
     
@@ -329,8 +336,7 @@ class Database {
      * It's usually unneeded since PHP do it automatically at script end.
      * 
      */
-    function close()
-    {
+    function close() {
         mysql_close();
     }
 
@@ -339,8 +345,7 @@ class Database {
      * 
      * @return The current time in seconds with microseconds (in float format).
      */
-    function getMicroTime()
-    {
+    function getMicroTime() {
         list($msec, $sec) = explode(' ', microtime());
         return floor($sec / 1000) + $msec;
     }
@@ -350,9 +355,7 @@ class Database {
      *
      * @return var that has been cleaned by mysql_real_escape_string
      */
-    function mres($val)
-    {
+    function mres($val) {
         return mysql_real_escape_string($val);
     }
 }
-?>

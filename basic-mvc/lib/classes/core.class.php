@@ -53,7 +53,7 @@ class Core {
     }
     
     /**
-     * Output error message stored in lib/errors
+     * Output error and die
      * 
      * @param string $error
      * @param array $messages
@@ -61,7 +61,40 @@ class Core {
      * 
      * @return string 
      */
-    public static function structureError($error, $messages, $die = true) {
+    public static function fatalError($error, $messages) {
+        
+        $out = $this->_grabErrorFile($error, $messages);
+        
+        die($out);
+        
+    }
+    
+    /**
+     * return error text
+     * 
+     * @param string $error
+     * @param array $messages
+     * @param bool $die
+     * 
+     * @return string 
+     */
+    public static function warningError($error, $messages) {
+        
+        $out = $this->_grabErrorFile($error, $messages);
+                
+        return $out;
+        
+    }
+    
+    /**
+     * Output error message stored in lib/errors
+     * 
+     * @param string $error
+     * @param array $messages
+     * 
+     * @return string 
+     */
+    private function _grabErrorFile($error, $messages = false) {
         
         ob_start();
         
@@ -94,19 +127,33 @@ class Core {
                 $errorFile = APP_PATH.'lib'.DS.'errors'.DS.'controller_naming.php';
                 self::addError('Incorrect class naming for Controller \' '.$controller.'\'');
                 break;
+            case 'dbConnectionFail':
+                $db_host = Config::read('db_host');
+                $db_user = Config::read('db_user');
+                $db_name = Config::read('db_name');
+                $errno = $messages['errno'];
+                $error = $messages['error'];
+                $errorFile = APP_PATH.'lib'.DS.'errors'.DS.'db_connection.php';
+                self::addError($errno.' : '.$error);
+                self::addError('Database Connection Failed; Host: \' '.$db_host.'\' User: \' '.$db_user.'\'');
+                break;
+            case 'dbDatabaseFail':
+                $db_host = Config::read('db_host');
+                $db_user = Config::read('db_user');
+                $db_name = Config::read('db_name');
+                $errno = $messages['errno'];
+                $error = $messages['error'];
+                $errorFile = APP_PATH.'lib'.DS.'errors'.DS.'db_database.php';
+                self::addError($errno.' : '.$error);
+                self::addError('Database Not Found; Host: \' '.$db_host.'\' DB: \' '.$db_name.'\'');
+                break;
         }
         require($errorFile);
         
         $out = ob_get_contents();
         ob_end_clean();
         
-        if($die === true) {
-            die($out);
-        }
-        else {
-            return $out;
-        }
-        
+        return $out;
     }
     
     public static function addError($message) {

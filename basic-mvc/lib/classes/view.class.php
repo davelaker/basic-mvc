@@ -29,7 +29,7 @@ class View {
             $messages = array();
             $messages['theme'] = $viewTemplate['viewTheme'];
             $messages['template'] = $viewTemplate['viewTemplate'];
-            $out = Core::structureError('missingTemplate', $messages, false);
+            $out = Core::warningError('missingTemplate', $messages);
         }
         else {
             ob_start();
@@ -49,7 +49,7 @@ class View {
             $messages = array();
             $messages['controller'] = $controllerOptions['controller'];
             $messages['method'] = $controllerOptions['method'];
-            $out = Core::structureError('missingView', $messages, false);
+            $out = Core::warningError('missingView', $messages);
         } 
         else {
             ob_start();
