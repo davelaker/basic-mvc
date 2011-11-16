@@ -65,7 +65,7 @@ class Dispatcher {
         if(!Core::checkFileExists($controllerFile)) {
             $messages = array();
             $messages['controller'] = $route['controller'];
-            Core::structureError('missingController', $messages);
+            Core::fatalError('missingController', $messages);
         }
         include($controllerFile);
         $ctrlClass .= 'Controller';
@@ -85,14 +85,14 @@ class Dispatcher {
                 $messages['method'] = $route['method'];
                 $messages['controller'] = $route['controller'];
                 
-                Core::structureError('missingMethod', $messages);
+                Core::fatalError('missingMethod', $messages);
             }
             
 		}
         else {
             $messages = array();
-                $messages['controller'] = $route['controller'];
-                Core::structureError('controllerNaming', $messages);
+            $messages['controller'] = $route['controller'];
+            Core::fatalError('controllerNaming', $messages);
         }
         
 		return $controller;

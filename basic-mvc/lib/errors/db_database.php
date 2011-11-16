@@ -1,0 +1,1 @@
+Failed to connect to database - check your database name
