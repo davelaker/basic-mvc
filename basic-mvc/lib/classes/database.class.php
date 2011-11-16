@@ -12,6 +12,7 @@ class Database {
     private $queries = array();
     private $lastResult;
     private $lastQueryExecution;
+    private $totalQueryExecution;
     private $objStart;
     private $defaultDebug = true;
     
@@ -54,12 +55,14 @@ class Database {
         $sqlStart = $this->getMicroTime();
         $result = mysql_query($sql) or $this->debugAndDie($sql);
         $sqlEnd = $this->getMicroTime();
-        $this->lastQueryExecution = $sqlStart - $sqlEnd;
+        $this->lastQueryExecution = $sqlEnd - $sqlStart;
+        $this->totalQueryExecution += $this->lastQueryExecution;
+        
         
         $this->queries[] = array(
             'start' => $sqlStart,
             'end' => $sqlEnd,
-            'time' => $sqlStart - $sqlEnd,
+            'time' => $sqlEnd - $sqlStart,
             'query' => $sql,
         );
         
@@ -301,6 +304,15 @@ class Database {
      */
     function getQueriesCount() {
         return $this->numQueries;
+    }
+
+    /**
+     * Get the number of seconds the queries took to execute
+     *
+     * @return float
+     */
+    function getTotalExecutionTime() {
+        return $this->totalQueryExecution;
     }
 
     /**
