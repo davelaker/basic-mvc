@@ -107,6 +107,7 @@ if(Config::read('debug') == true) {
             font-size: 12px;
             font-family: helvetica, arial, sans-serif;
             width:auto;
+            display: none;
         }
         #_mvc_errorBox h1 {
             font-size: 16px;
@@ -136,7 +137,7 @@ if(Config::read('debug') == true) {
     <div id="_mvc_toggle_debug" class="open" onclick="toggleDebug();">
         [ - ]
     </div>
-    <div id="_mvc_errorBox">
+    <div id="_mvc_errorBox" class="closed">
         <p>
             Page Load Time: <?php echo round(Config::read('_mvc_page_end_time') - Config::read('_mvc_page_start_time'), 2); ?>
             <?php $errors = Config::read('_mvc_errors'); 
