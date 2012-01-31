@@ -188,7 +188,7 @@ class Database {
     }
 
     /**
-     * Internal function to debug when MySQL encountered an error, even if debug is set to Off.
+     * Debug when MySQL encountered an error, even if debug is set to Off.
      *
      * @param $sql string The SQL query to echo before diying.
      */
@@ -199,7 +199,7 @@ class Database {
     }
 
     /**
-     * Internal function to debug a MySQL query.
+     * Debug a MySQL query.
      * Show the query and output the resulting table if not NULL.
      *
      * @param $debug bool The parameter passed to query() functions. Can be boolean or -1 (default).
@@ -291,16 +291,16 @@ class Database {
     /**
      * Get how many time the script took from the begin of this object.
      *
-     * @return The script execution time in seconds since the creation of this object.
+     * @return float
      */
     function getExecTime() {
-        return round(($this->getMicroTime() - $this->mtStart) * 1000) / 1000;
+        return round(($this->getMicroTime() - $this->objStart) * 1000) / 1000;
     }
 
     /**
      * Get the number of queries executed from the begin of this object.
      *
-     * @return The number of queries executed on the database server since the creation of this object.
+     * @return int
      */
     function getQueriesCount() {
         return $this->numQueries;
@@ -316,9 +316,9 @@ class Database {
     }
 
     /**
-     * Get the number of queries executed from the begin of this object.
+     * Get all queries executed from the begin of this object.
      *
-     * @return The number of queries executed on the database server since the creation of this object.
+     * @return array
      */
     function getQueries() {
         return $this->queries;
@@ -327,7 +327,7 @@ class Database {
     /**
      * Go back to the first element of the result line.
      * 
-     * @param $result The resssource returned by the doQuery() function.
+     * @param $result 
      */
     function resetFetch($result) {
         if (mysql_num_rows($result) > 0) mysql_data_seek($result, 0);
@@ -336,16 +336,15 @@ class Database {
     /**
      * Get the id of the very last inserted row.
      *
-     * @return The id of the very last inserted row (in any table).
+     * @return int
      */
     function lastInsertedId() {
         return mysql_insert_id();
     }
     
     /**
-     * Close the connexion with the database server.
-     *
-     * It's usually unneeded since PHP do it automatically at script end.
+     * Close the connection with the database server 
+     * PHP normally does it automatically at the end of a script.
      * 
      */
     function close() {
@@ -353,19 +352,23 @@ class Database {
     }
 
     /**
-     * Internal method to get the current time.
+     * Get current time in seconds
      * 
-     * @return The current time in seconds with microseconds (in float format).
+     * @return float
      */
     function getMicroTime() {
-        list($msec, $sec) = explode(' ', microtime());
-        return floor($sec / 1000) + $msec;
+        
+        return microtime(true);
+        
+        # Below was an alternative way to do things, but it failed very occasionly - codepad.org/OVf9aoOR
+        #list($msec, $sec) = explode(' ', microtime());
+        #return floor($sec / 1000) + $msec;
     }
 
     /**
-     * Internal method to add mysql_real_escape_string to vars in query.
+     * Add mysql_real_escape_string to vars in query.
      *
-     * @return var that has been cleaned by mysql_real_escape_string
+     * @return string
      */
     function mres($val) {
         return mysql_real_escape_string($val);
