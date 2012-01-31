@@ -101,30 +101,30 @@ class Core {
         switch($error) {
             case 'missingController':
                 $controller = $messages['controller'];
-                $errorFile = APP_PATH.'lib'.DS.'errors'.DS.'missing_controller.php';
+                $errorFile = CORE_PATH.'lib'.DS.'errors'.DS.'missing_controller.php';
                 self::addError('Missing Controller \''.$controller.'\'');
                 break;
             case 'missingMethod':
                 $controller = $messages['controller'];
                 $method = $messages['method'];
-                $errorFile = APP_PATH.'lib'.DS.'errors'.DS.'missing_method.php';
+                $errorFile = CORE_PATH.'lib'.DS.'errors'.DS.'missing_method.php';
                 self::addError('Missing Method \''.$method.'\' for Controller \' '.$controller.'\'');
                 break;
             case 'missingTemplate':
                 $theme = $messages['theme'];
                 $template = $messages['template'];
-                $errorFile = APP_PATH.'lib'.DS.'errors'.DS.'missing_template.php';
+                $errorFile = CORE_PATH.'lib'.DS.'errors'.DS.'missing_template.php';
                 self::addError('Missing Templete \''.$theme.'\' for Theme \' '.$theme.'\'');
                 break;
             case 'missingView':
                 $controller = $messages['controller'];
                 $method = $messages['method'];
-                $errorFile = APP_PATH.'lib'.DS.'errors'.DS.'missing_view.php';
+                $errorFile = CORE_PATH.'lib'.DS.'errors'.DS.'missing_view.php';
                 self::addError('Missing View \''.$method.'\' for Controller \' '.$controller.'\'');
                 break;
             case 'controllerNaming':
                 $controller = $messages['controller'];
-                $errorFile = APP_PATH.'lib'.DS.'errors'.DS.'controller_naming.php';
+                $errorFile = CORE_PATH.'lib'.DS.'errors'.DS.'controller_naming.php';
                 self::addError('Incorrect class naming for Controller \' '.$controller.'\'');
                 break;
             case 'dbConnectionFail':
@@ -133,7 +133,7 @@ class Core {
                 $db_name = Config::read('db_name');
                 $errno = $messages['errno'];
                 $error = $messages['error'];
-                $errorFile = APP_PATH.'lib'.DS.'errors'.DS.'db_connection.php';
+                $errorFile = CORE_PATH.'lib'.DS.'errors'.DS.'db_connection.php';
                 self::addError($errno.' : '.$error);
                 self::addError('Database Connection Failed; Host: \' '.$db_host.'\' User: \' '.$db_user.'\'');
                 break;
@@ -143,7 +143,7 @@ class Core {
                 $db_name = Config::read('db_name');
                 $errno = $messages['errno'];
                 $error = $messages['error'];
-                $errorFile = APP_PATH.'lib'.DS.'errors'.DS.'db_database.php';
+                $errorFile = CORE_PATH.'lib'.DS.'errors'.DS.'db_database.php';
                 self::addError($errno.' : '.$error);
                 self::addError('Database Not Found; Host: \' '.$db_host.'\' DB: \' '.$db_name.'\'');
                 break;
