@@ -94,7 +94,7 @@ class Core {
      * 
      * @return string 
      */
-    private function _grabErrorFile($error, $messages = false) {
+    private static function _grabErrorFile($error, $messages = false) {
         
         ob_start();
         
