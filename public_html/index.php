@@ -108,11 +108,11 @@ if(Config::read('debug') == true) {
             font-family: helvetica, arial, sans-serif;
             width:auto;
         }
-        h1 {
+        #_mvc_errorBox h1 {
             font-size: 16px;
             text-shadow: 2px 2px 6px #000;
         }
-        table {
+        #_mvc_errorBox table {
             border: 0px;
         }
     </style>
