@@ -52,12 +52,12 @@ switch (APP_ENV) {
 
 if (function_exists('ini_set')) {
     ini_set('include_path', CORE_INCLUDES_PATH . DS . PATH_SEPARATOR . ROOT . DS . APP_DIR . DS . PATH_SEPARATOR . ROOT . DS . PATH_SEPARATOR . ini_get('include_path'));
-    define('APP_PATH', null);
-    define('CORE_PATH', null);
+    if (!defined('APP_PATH')) define('APP_PATH', null);
+    if (!defined('CORE_PATH')) define('CORE_PATH', null);
 }
 else {
-    define('APP_PATH', ROOT . DS . APP_DIR . DS);
-    define('CORE_PATH', CORE_INCLUDES_PATH . DS);
+    if (!defined('APP_PATH')) define('APP_PATH', ROOT . DS . APP_DIR . DS);
+    if (!defined('CORE_PATH')) define('CORE_PATH', CORE_INCLUDES_PATH . DS);
 }
 
 if (!include(CORE_PATH . 'lib' . DS . 'bootstrap.php')) {
