@@ -10,6 +10,7 @@ session_start();
 
 require CORE_PATH . 'lib' . DS . 'functions' . DS . 'core.php';
 require CORE_PATH . 'lib' . DS . 'classes' . DS . 'core.class.php';
+require CORE_PATH . 'lib' . DS . 'classes' . DS . 'empty.class.php';
 require CORE_PATH . 'lib' . DS . 'classes' . DS . 'dispatcher.class.php';
 require CORE_PATH . 'lib' . DS . 'classes' . DS . 'controller.class.php';
 require CORE_PATH . 'lib' . DS . 'classes' . DS . 'model.class.php';
