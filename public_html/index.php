@@ -110,6 +110,7 @@ if(Config::read('debug') == true) {
     font-size: 12px;
     font-family: helvetica, arial, sans-serif;
     width:auto;
+    display: none;
   }
   #_mvc_errorBox h1 {
     font-size: 16px;
@@ -140,10 +141,10 @@ if(Config::read('debug') == true) {
     }
   }
 </script>
-<div id="_mvc_toggle_debug" class="open" onclick="toggleDebug();">
+<div id="_mvc_toggle_debug" class="closed" onclick="toggleDebug();">
   [ - ]
 </div>
-<div id="_mvc_errorBox">
+<div id="_mvc_errorBox" style="display:none">
 <p>
   Page Load Time: <?php echo round(Config::read('_mvc_page_end_time') - Config::read('_mvc_page_start_time'), 2); ?>
   <?php $errors = Config::read('_mvc_errors');
@@ -155,8 +156,8 @@ if(Config::read('debug') == true) {
       <?php endforeach; ?>
     </ul>
     <?php endif;
-  if(Config::read('db_name') != '') :
-    $db = Database::getInstance();
+    if(Config::read('db_name') != '') :
+      $db = Database::getInstance();
     ?>
     <h1>Queries: </h1>
     <p>There were a total of <?php echo $db->getQueriesCount(); ?> queries (<?php echo $db->getTotalExecutionTime(); ?>s)</p>
