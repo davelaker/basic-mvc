@@ -110,7 +110,6 @@ if(Config::read('debug') == true) {
     font-size: 12px;
     font-family: helvetica, arial, sans-serif;
     width:auto;
-    display: none;
   }
   #_mvc_errorBox h1 {
     font-size: 16px;
@@ -142,7 +141,7 @@ if(Config::read('debug') == true) {
   }
 </script>
 <div id="_mvc_toggle_debug" class="closed" onclick="toggleDebug();">
-  [ - ]
+  [ + ]
 </div>
 <div id="_mvc_errorBox" style="display:none">
 <p>
