@@ -118,8 +118,8 @@ class Controller {
     $_SESSION['tempVars'] = array();
   }
 
-  protected function getTempVar($name) {
-    return idx($this->tempVars, $name, null);
+  protected function getTempVar($name, $default = '') {
+    return idx($this->tempVars, $name, $default);
   }
 
   protected function getTempVars() {
