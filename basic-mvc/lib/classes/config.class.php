@@ -1,4 +1,4 @@
-<?
+<?php
 class Config {
 
   protected static $_filenames = array();
@@ -121,14 +121,11 @@ class Config {
       self::$_configs[$configName] = $configVal;
     }
 
-
   }
 
   private static function _addPHPConfigs($fullPath) {
-
     require_once($fullPath);
     return $phpConfigs;
-
   }
 
   private static function _addINIConfigs($fullPath) {
