@@ -61,7 +61,6 @@ class View {
     }
 
     return $out;
-
   }
 
   public function commonInclude($location, $extraViewVars = array()) {
