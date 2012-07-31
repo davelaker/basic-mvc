@@ -121,6 +121,8 @@ class Config {
       self::$_configs[$configName] = $configVal;
     }
 
+    self::addSessionConfigs();
+
   }
 
   private static function _addPHPConfigs($fullPath) {
@@ -140,7 +142,7 @@ class Config {
 
   }
 
-  public static function addSessionConfigs() {
+  private static function addSessionConfigs() {
     if (!empty($_SESSION['_configs'])) {
       foreach ($_SESSION['_configs'] as $name => $value) {
         self::$_configs[$name] = $value;

@@ -18,4 +18,3 @@ require CORE_PATH . 'lib' . DS . 'classes' . DS . 'view.class.php';
 require CORE_PATH . 'lib' . DS . 'classes' . DS . 'database.class.php';
 require CORE_PATH . 'lib' . DS . 'classes' . DS . 'config.class.php';
 Config::addConfigs();
-Config::addSessionConfigs();
