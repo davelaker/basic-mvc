@@ -35,10 +35,30 @@ class Model {
         }
       }
 
+      $max_length = idx($rule, 'maxlength', false);
+      if ($max_length !== false) {
+        if (strlen($value) > $max_length) {
+          $errors[$field] = 'You must enter at most ' . $max_length . ' characters';
+          continue;
+        }
+      }
+
       $type = idx($rule, 'type');
       switch ($type) {
         case 'alphanumeric' :
-          if (!preg_match('/^[A-Za-z][A-Za-z0-9]*(?:_[A-Za-z0-9]+)*$/', $value)) {
+          if (!preg_match('/^[A-Za-z][A-Za-z0-9]*(?:[A-Za-z0-9]+)*$/', $value)) {
+            $errors[$field] = $message;
+            continue;
+          }
+          break;
+        case 'alphanumeric_extra' :
+          if (!preg_match('/^[A-Za-z][A-Za-z0-9]*(?:[-_ ]*[A-Za-z0-9]+)*$/', $value)) {
+            $errors[$field] = $message;
+            continue;
+          }
+          break;
+        case 'password' :
+          if (!preg_match('/[a-zA-Z0-9._^%$#!~@,-]+/', $value)) {
             $errors[$field] = $message;
             continue;
           }
@@ -59,7 +79,6 @@ class Model {
         case 'required' :
           if ($value === '') {
             $errors[$field] = $message;
-            ;
             continue;
           }
           break;
