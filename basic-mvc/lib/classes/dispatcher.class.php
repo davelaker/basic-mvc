@@ -102,6 +102,8 @@ class Dispatcher {
       if (method_exists($controller, $route['method'])) {
         $controller->method = $route['method'];
         $controller->params = $route['params'];
+        $controller->getVars = $this->handleGetVars();
+        $controller->postVars = $this->handlePostVars();
         $controller->beforeMethod();
         $controller->{$route['method']}();
         $controller->beforeView($route);
@@ -125,6 +127,14 @@ class Dispatcher {
 
     return $controller;
 
+  }
+
+  private function handleGetVars() {
+    return $_GET;
+  }
+
+  private function handlePostVars() {
+    return $_POST;
   }
 
 }
