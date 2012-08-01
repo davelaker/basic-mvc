@@ -130,13 +130,15 @@ class Dispatcher {
   }
 
   private function handleGetVars() {
+    $vars = $_GET;
     $_GET = array();
-    return $_GET;
+    return $vars;
   }
 
   private function handlePostVars() {
+    $vars = $_POST;
     $_POST = array();
-    return $_POST;
+    return $vars;
   }
 
 }
